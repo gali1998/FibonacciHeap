@@ -8,6 +8,7 @@ public class FibonacciHeap {
 	private HeapNode first;
 	private int size;
 	private int numMarked = 0;
+	private int numTrees = 0;
 
 	private static int linksCounter = 0;
 	private static int cutsCounter = 0;
@@ -147,9 +148,11 @@ public class FibonacciHeap {
 	 */
 	private void resetHeap(HeapNode[] rankedTrees) {
 		this.first = null;
+		this.numTrees = 0;
 
 		for (HeapNode consolidatedRoot: rankedTrees) {
 			if (consolidatedRoot != null) {
+				this.numTrees++;
 				if (this.first == null) {
 					this.first = consolidatedRoot;
 					this.first.next = this.first;
