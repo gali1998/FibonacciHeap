@@ -8,6 +8,9 @@ public class FibonacciHeap {
 	private HeapNode first;
 	private int size;
 
+	private static int linksCounter = 0;
+	private static int cutsCounter = 0;
+
 	/**
 	 * public boolean isEmpty()
 	 *
@@ -58,8 +61,137 @@ public class FibonacciHeap {
 	 *
 	 */
 	public void deleteMin() {
-		return; // should be replaced by student code
+		if (this.size == 0) {
+			return;
+		}
+		HeapNode node = this.min;
+		HeapNode subtree = this.min.child;
 
+		// first we cut out all min subtrees
+		do {
+			subtree.parent = null;
+			subtree = subtree.next;
+		} while(subtree != this.min.child);
+
+		this.meldRoots(subtree);
+
+		// if the min node is the first, we advance it.
+		if (first == min) {
+			first = first.next;
+		}
+		this.min.removeFromTree();
+		this.min = null;
+
+		this.size--;
+
+		// if we now have an empty tree, we set all pointers to null;
+		if (size == 0) {
+			first = null;
+		}
+
+		this.consolidate();
+
+		this.updateMin();
+	}
+
+	/**
+	 * updating the minimum value key
+	 */
+	private void updateMin() {
+		HeapNode curr = this.first;
+		this.min = curr;
+		do {
+			if (curr.key < this.min.key) {
+				this.min = curr;
+			}
+			curr = curr.next;
+		} while (curr != this.first);
+	}
+
+	/**
+	 * iterating over all roots. upon finding 2 roots of equal rank, we link them until we finish iterating over
+	 *	known same rank roots.
+	 */
+	private void consolidate() {
+		HeapNode[] rankedTrees = new HeapNode[(int) Math.log(this.size)]; // the max achievable rank is log2(n)
+		HeapNode last = this.first.prev;
+		HeapNode curr = this.first;
+		rankedTrees[curr.rank] = curr;
+
+		do {
+			curr = attemptConsolidating(curr, rankedTrees);
+		} while (curr != last);
+
+		attemptConsolidating(curr, rankedTrees);
+
+		this.resetHeap(rankedTrees);
+	}
+
+	/**
+	 * after linking all possible root pairs, we set the heap to link to all the trees in the rankedTrees array.
+	 * @param rankedTrees - array of all trees post consolidation
+	 */
+	private void resetHeap(HeapNode[] rankedTrees) {
+		HeapNode curr = null;
+		this.first = null;
+
+		for (HeapNode consolidatedRoot: rankedTrees) {
+			if (consolidatedRoot != null) {
+				if (this.first == null) {
+					this.first = consolidatedRoot;
+					curr = this.first;
+					curr.next = this.first;
+					curr.prev = this.first;
+				} else {
+					consolidatedRoot.prev = curr;
+					consolidatedRoot.next = this.first;
+					curr.next = consolidatedRoot;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Attempts to link the tree at curr, with any of the already familiar trees in rankedTrees.
+	 * 	If rankedTrees[curr.rank] == null (we aren't familiar with trees of the corresponding rank) we add the tree
+	 * 	to the array.
+	 * @param curr - curr tree to attempt consolidating
+	 * @param rankedTrees - familiar ranked trees
+	 * @return - the next node to carry on from.
+	 */
+	private HeapNode attemptConsolidating(HeapNode curr, HeapNode[] rankedTrees) {
+		HeapNode consolidated = curr;
+		curr = curr.next;
+
+		while (rankedTrees[consolidated.rank] != null) { // we can link
+			HeapNode toLink = rankedTrees[consolidated.rank];
+			rankedTrees[consolidated.rank] = null;
+
+			consolidated = FibonacciHeap.link(consolidated, toLink);
+		}
+		rankedTrees[consolidated.rank] = consolidated;
+
+		return curr;
+	}
+
+
+	/**
+	 * private function, linking 2 Fib trees of the same rank
+	 * @param root1 - one of the roots
+	 * @param root2 - second root
+	 * @return - the parent node
+	 */
+	private static HeapNode link(HeapNode root1, HeapNode root2) {
+		linksCounter++;
+		if (root1.getKey() > root2.getKey()) {
+			root1.removeFromTree();
+			root2.addChild(root1);
+			return root2;
+		} else {
+			root2.removeFromTree();
+			root1.addChild(root1);
+			return root1;
+		}
 	}
 
 	/**
@@ -80,6 +212,16 @@ public class FibonacciHeap {
 	 */
 	public void meld(FibonacciHeap heap2) {
 		return; // should be replaced by student code
+	}
+
+	/**
+	 * executing the actual trees lists meld
+	 * @param first - first of the root list
+	 */
+	private void meldRoots(HeapNode first) {
+		HeapNode last = this.first.prev;
+		last.next = first;
+		this.first.prev = first.prev;
 	}
 
 	/**
@@ -111,7 +253,9 @@ public class FibonacciHeap {
 	 *
 	 */
 	public void delete(HeapNode x) {
-		
+		int delta = 1 + x.getKey() - this.findMin().getKey(); // we will reduce the key to one less than the minimum
+		this.decreaseKey(x, delta);
+		this.deleteMin();
 	}
 	
 	public void delete(int x) {
@@ -136,7 +280,30 @@ public class FibonacciHeap {
 	 * procedure should be applied if needed).
 	 */
 	public void decreaseKey(HeapNode x, int delta) {
-		return; // should be replaced by student code
+		x.key =  x.key - delta;
+		if (x.parent != null) {
+			if (x.parent.key > x.key) {
+				cut(x);
+			}
+		}
+	}
+
+	/**
+	 * performing cut operation on x, and all marked parents of x recursively
+	 * @param x - the root of the subtree we cut from the entire tree
+	 */
+	private void cut(HeapNode x) {
+		HeapNode parent = x.parent;
+		x.removeFromTree();
+		x.marked = false;
+		this.meldRoots(x);
+		if (parent.parent != null) {
+			if (parent.marked) {
+				cut(parent);
+			} else {
+				parent.marked = true;
+			}
+		}
 	}
 
 	/**
@@ -160,7 +327,7 @@ public class FibonacciHeap {
 	 * smaller value in its root.
 	 */
 	public static int totalLinks() {
-		return 0; // should be replaced by student code
+		return linksCounter;
 	}
 
 	/**
@@ -171,7 +338,7 @@ public class FibonacciHeap {
 	 * diconnects a subtree from its parent (during decreaseKey/delete methods).
 	 */
 	public static int totalCuts() {
-		return 0; // should be replaced by student code
+		return cutsCounter;
 	}
 
 	/**
@@ -211,9 +378,9 @@ public class FibonacciHeap {
 		public int key;
 
 		// our fields
-		private int rank;
-		private boolean marked;
-		private HeapNode child, next, prev, parent;
+		public int rank;
+		public boolean marked;
+		public HeapNode child, next, prev, parent;
 
 		public HeapNode(int key) {
 			this.key = key;
@@ -260,5 +427,14 @@ public class FibonacciHeap {
 			}
 		}
 
+		public void addChild(HeapNode child) {
+			if (this.child != null) {
+				this.child.addSibling(child);
+			} else {
+				this.rank++;
+			}
+			this.child = child;
+			child.parent = this;
+		}
 	}
 }
