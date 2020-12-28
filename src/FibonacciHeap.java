@@ -146,21 +146,16 @@ public class FibonacciHeap {
 	 * @param rankedTrees - array of all trees post consolidation
 	 */
 	private void resetHeap(HeapNode[] rankedTrees) {
-		HeapNode curr = null;
 		this.first = null;
 
 		for (HeapNode consolidatedRoot: rankedTrees) {
 			if (consolidatedRoot != null) {
 				if (this.first == null) {
 					this.first = consolidatedRoot;
-					curr = this.first;
-					curr.next = this.first;
-					curr.prev = this.first;
+					this.first.next = this.first;
+					this.first.prev = this.first;
 				} else {
-					consolidatedRoot.prev = curr;
-					consolidatedRoot.next = this.first;
-					curr.next = consolidatedRoot;
-				}
+					this.first.addSibling(consolidatedRoot);				}
 			}
 		}
 	}
@@ -427,6 +422,11 @@ public class FibonacciHeap {
 			}
 		}
 
+		/**
+		 * adds sibling between this, and this.prev (post = prev, sibling, this)
+		 * if there are parents, we update the rank
+		 * @param sibling  - the sibling to insert between prev and this
+		 */
 		public void addSibling(HeapNode sibling) {
 			HeapNode siblingNext = this;
 			HeapNode siblingPrev = this.prev;
