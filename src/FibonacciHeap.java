@@ -7,6 +7,7 @@ public class FibonacciHeap {
 	private HeapNode min;
 	private HeapNode first;
 	private int size;
+	private int numMarked = 0;
 
 	private static int linksCounter = 0;
 	private static int cutsCounter = 0;
@@ -54,6 +55,18 @@ public class FibonacciHeap {
 		return node;
 	}
 
+	private void unmark(HeapNode node) {
+		if (node.marked) {
+			node.marked = false;
+			this.numMarked--;
+		}
+	}
+
+	private void mark(HeapNode node) {
+		node.marked = true;
+		this.numMarked++;
+	}
+
 	/**
 	 * public void deleteMin()
 	 *
@@ -70,6 +83,7 @@ public class FibonacciHeap {
 		// first we cut out all min subtrees
 		do {
 			subtree.parent = null;
+			this.unmark(subtree);
 			subtree = subtree.next;
 		} while(subtree != this.min.child);
 
@@ -295,13 +309,13 @@ public class FibonacciHeap {
 	private void cut(HeapNode x) {
 		HeapNode parent = x.parent;
 		x.removeFromTree();
-		x.marked = false;
+		this.unmark(x);
 		this.meldRoots(x);
 		if (parent.parent != null) {
 			if (parent.marked) {
 				cut(parent);
 			} else {
-				parent.marked = true;
+				this.mark(parent);
 			}
 		}
 	}
