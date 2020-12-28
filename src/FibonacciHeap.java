@@ -5,6 +5,9 @@
  */
 public class FibonacciHeap
 {
+	private HeapNode min;
+	private HeapNode first;
+	private int size;
 
    /**
     * public boolean isEmpty()
@@ -17,7 +20,7 @@ public class FibonacciHeap
     */
     public boolean isEmpty()
     {
-    	return false; // should be replaced by student code
+    	return this.min == null;
     }
 		
    /**
@@ -29,7 +32,24 @@ public class FibonacciHeap
     */
     public HeapNode insert(int key)
     {    
-    	return new HeapNode(key); // should be replaced by student code
+    	HeapNode node = new HeapNode(key);
+    	
+    	if (this.isEmpty()) {
+    		node.next = node;
+    		node.prev = node;
+    		this.min = node;
+    		this.first = node;
+    		this.size = 1;
+    	} else {
+    		this.first.addSibling(node);
+    		this.size++;
+    	}
+    	
+    	if (key < this.min.getKey()) {
+    		this.min = node;
+    	}
+    	
+    	return node;
     }
 
    /**
@@ -160,6 +180,17 @@ public class FibonacciHeap
         return arr; // should be replaced by student code
     }
     
+    // *** REMOVE THIS ****
+    
+    public void printHeap() {
+    	HeapNode node = this.first;
+    	
+    	for (int i = 0; i < this.size; i++) {
+    		System.out.print(node.getKey() + " ,");
+    		node = node.next;
+    	}
+    }
+    
    /**
     * public class HeapNode
     * 
@@ -169,16 +200,36 @@ public class FibonacciHeap
     *  
     */
     public class HeapNode{
-
 	public int key;
+	
+	// our fields
+	private int rank;
+	private boolean marked;
+	private HeapNode child, next, prev, parent;
 
   	public HeapNode(int key) {
 	    this.key = key;
+	    this.rank = 0;
+	    this.marked = false;
       }
 
   	public int getKey() {
 	    return this.key;
       }
+  	
+  	public void addSibling(HeapNode sibling) {
+  		HeapNode siblingNext = this;
+  		HeapNode siblingPrev = this.prev;
+  		
+  		sibling.next = siblingNext;
+  		sibling.prev = siblingPrev;
+  		siblingPrev.next = sibling;
+  		this.prev = sibling;
+  		
+  		if (this.parent != null) {
+  			this.parent.rank++;
+  		}
+  	}
 
     }
 }
