@@ -78,17 +78,19 @@ public class FibonacciHeap {
 		if (this.size == 0) {
 			return;
 		}
-		HeapNode node = this.min;
+
 		HeapNode subtree = this.min.child;
+		if (subtree != null) {
 
-		// first we cut out all min subtrees
-		do {
-			subtree.parent = null;
-			this.unmark(subtree);
-			subtree = subtree.next;
-		} while(subtree != this.min.child);
+			// first we cut out all min subtrees
+			do {
+				subtree.parent = null;
+				this.unmark(subtree);
+				subtree = subtree.next;
+			} while (subtree != this.min.child);
 
-		this.meldRoots(subtree);
+			this.meldRoots(subtree);
+		}
 
 		// if the min node is the first, we advance it.
 		if (first == min) {
@@ -102,11 +104,11 @@ public class FibonacciHeap {
 		// if we now have an empty tree, we set all pointers to null;
 		if (size == 0) {
 			first = null;
-		}
+		} else {
+            this.consolidate();
+            this.updateMin();
+        }
 
-		this.consolidate();
-
-		this.updateMin();
 	}
 
 	/**
@@ -128,63 +130,52 @@ public class FibonacciHeap {
 	 *	known same rank roots.
 	 */
 	private void consolidate() {
-		HeapNode[] rankedTrees = new HeapNode[(int) Math.log(this.size)]; // the max achievable rank is log2(n)
-		HeapNode last = this.first.prev;
-		HeapNode curr = this.first;
-		rankedTrees[curr.rank] = curr;
-
-		do {
-			curr = attemptConsolidating(curr, rankedTrees);
-		} while (curr != last);
-
-		attemptConsolidating(curr, rankedTrees);
-
-		this.resetHeap(rankedTrees);
+		HeapNode[] buckets = this.toBuckets();
+		this.fromBuckets(buckets);
 	}
 
-	/**
-	 * after linking all possible root pairs, we set the heap to link to all the trees in the rankedTrees array.
-	 * @param rankedTrees - array of all trees post consolidation
-	 */
-	private void resetHeap(HeapNode[] rankedTrees) {
-		this.first = null;
-		this.numTrees = 0;
+    /**
+     * Sending all trees to buckets in according to rank, and linking trees with the same buckets
+     * @return the buckets containing trees indexed according to rank
+     */
+	private HeapNode[] toBuckets() {
+        HeapNode[] rankedTrees = new HeapNode[(int) Math.ceil(1.4404*Math.log(this.size))]; // the max achievable rank is log_phi(n)
+        this.first.prev.next = null;
+        HeapNode x = this.first;
 
-		for (HeapNode consolidatedRoot: rankedTrees) {
-			if (consolidatedRoot != null) {
-				this.numTrees++;
-				if (this.first == null) {
-					this.first = consolidatedRoot;
-					this.first.next = this.first;
-					this.first.prev = this.first;
-				} else {
-					this.first.addSibling(consolidatedRoot);				}
-			}
-		}
-	}
+        while (x != null) {
+            HeapNode y = x;
+            x = x.next;
+            while (rankedTrees[y.rank] != null) {
+                y = link(y, rankedTrees[y.rank]);
+                rankedTrees[y.rank - 1] = null;
+            }
+            rankedTrees[y.rank] = y;
+        }
 
-	/**
-	 * Attempts to link the tree at curr, with any of the already familiar trees in rankedTrees.
-	 * 	If rankedTrees[curr.rank] == null (we aren't familiar with trees of the corresponding rank) we add the tree
-	 * 	to the array.
-	 * @param curr - curr tree to attempt consolidating
-	 * @param rankedTrees - familiar ranked trees
-	 * @return - the next node to carry on from.
-	 */
-	private HeapNode attemptConsolidating(HeapNode curr, HeapNode[] rankedTrees) {
-		HeapNode consolidated = curr;
-		curr = curr.next;
+        return rankedTrees;
+    }
 
-		while (rankedTrees[consolidated.rank] != null) { // we can link
-			HeapNode toLink = rankedTrees[consolidated.rank];
-			rankedTrees[consolidated.rank] = null;
+    /**
+     * Resetting the heap to contain all trees from the buckets according to ascending order.
+     * @param buckets - the buckets containing trees indexed by rank
+     */
+    private void fromBuckets(HeapNode[] buckets) {
+        this.first = null;
+        this.numTrees = 0;
 
-			consolidated = FibonacciHeap.link(consolidated, toLink);
-		}
-		rankedTrees[consolidated.rank] = consolidated;
-
-		return curr;
-	}
+        for (HeapNode consolidatedRoot: buckets) {
+            if (consolidatedRoot != null) {
+                this.numTrees++;
+                if (this.first == null) {
+                    this.first = consolidatedRoot;
+                    this.first.next = this.first;
+                    this.first.prev = this.first;
+                } else {
+                    this.first.addSibling(consolidatedRoot);				}
+            }
+        }
+    }
 
 
 	/**
@@ -295,27 +286,39 @@ public class FibonacciHeap {
 		x.key =  x.key - delta;
 		if (x.parent != null) {
 			if (x.parent.key > x.key) {
-				cut(x);
+				cascadingCut(x);
 			}
 		}
+		if (x.key < this.min.getKey()) {
+		    this.min = x;
+        }
 	}
 
+    /**
+     * performs cascading cuts on x and all successive marked parents
+     * @param x - node to cut from the tree
+     */
+	private void cascadingCut(HeapNode x) {
+	    HeapNode xParent = x.parent;
+        this.cut(x);
+        if (xParent != null) {
+            if (!xParent.marked) {
+                this.mark(xParent);
+            }
+            else {
+                cascadingCut(xParent);
+            }
+        }
+    }
+
 	/**
-	 * performing cut operation on x, and all marked parents of x recursively
+	 * performing cut operation on x
 	 * @param x - the root of the subtree we cut from the entire tree
 	 */
 	private void cut(HeapNode x) {
-		HeapNode parent = x.parent;
 		x.removeFromTree();
 		this.unmark(x);
 		this.meldRoots(x);
-		if (parent.parent != null) {
-			if (parent.marked) {
-				cut(parent);
-			} else {
-				this.mark(parent);
-			}
-		}
 	}
 
 	/**
