@@ -139,7 +139,7 @@ public class FibonacciHeap {
      * @return the buckets containing trees indexed according to rank
      */
 	private HeapNode[] toBuckets() {
-        HeapNode[] rankedTrees = new HeapNode[(int) Math.ceil(1.4404*Math.log(this.size)) + 1]; // the max achievable rank is log_phi(n)
+        HeapNode[] rankedTrees = new HeapNode[(int) Math.ceil(Math.log(this.size)/Math.log(1.618)) + 1]; // the max achievable rank is log_phi(n)
         this.first.prev.next = null;
         this.first.prev = null;
         HeapNode x = this.first;
@@ -308,10 +308,10 @@ public class FibonacciHeap {
 	private void cascadingCut(HeapNode x) {
 	    HeapNode xParent = x.parent;
         this.cut(x);
+		xParent.rank--;
         if (xParent.parent != null) {
             if (!xParent.marked) {
                 this.mark(xParent);
-                xParent.rank--;
             }
             else {
                 cascadingCut(xParent);
@@ -426,12 +426,14 @@ public class FibonacciHeap {
 			if (this.next == this) {
 				if (this.parent != null) {
 					this.parent.child = null;
+                    this.parent = null;
 				}
 			} else {
 				if (this.parent != null) {
 					if (this.parent.child == this) {
 						this.parent.child = this.next;
 					}
+                    this.parent = null;
 				}
 				this.next.prev = this.prev;
 				this.prev.next = this.next;

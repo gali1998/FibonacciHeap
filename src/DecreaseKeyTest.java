@@ -3,6 +3,11 @@ import java.util.concurrent.ThreadLocalRandom;
 public class DecreaseKeyTest {
 
     public static boolean decreaseKeyTests(FibonacciHeap heap, int delta, FibonacciHeap.HeapNode x) {
+        if (x.parent != null) {
+            if (x.parent.marked) {
+                int jasdf = 1;
+            }
+        }
         int numTrees = TestUtils.countTrees(heap);
         int n = heap.getNumTrees();
         int priorCuts = FibonacciHeap.totalCuts();
@@ -20,12 +25,24 @@ public class DecreaseKeyTest {
             System.out.println("Heap rule broken!");
             return false;
         }
-        if (!TestUtils.checkRankRule(heap)) {
-            System.out.println("Rank rule broken!");
-            return false;
-        }
         if (!TestUtils.checkSize(heap)) {
             System.out.println("Bad size!");
+            return false;
+        }
+        if (!TestUtils.checkHeapNodeSingleReference(heap)) {
+            System.out.println("Bad nodes referencing!");
+            return false;
+        }
+        if (!TestUtils.checkHeapLineage(heap)) {
+            System.out.println("Bad heap lineage!");
+            return false;
+        }
+        if (!TestUtils.checkHeapCirculation(heap)) {
+            System.out.println("Bad heap circulation!");
+            return false;
+        }
+        if (!TestUtils.checkHeapRank(heap)) {
+            System.out.println("Bad rank keeping!");
             return false;
         }
 
@@ -63,7 +80,7 @@ public class DecreaseKeyTest {
 
     public static boolean randomHeapsTest() {
         int numIters = 10000;
-        int maxDeletes = 100;
+        int maxDeletes = 1000;
         int maxSize = 1000;
         FibonacciHeap heap = null;
         for (int i =0; i < numIters; i++) {

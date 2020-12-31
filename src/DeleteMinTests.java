@@ -1,6 +1,6 @@
 import java.util.concurrent.ThreadLocalRandom;
 
-public class DeleteTests {
+public class DeleteMinTests {
 
     public static boolean checkOrder(FibonacciHeap heap) {
         FibonacciHeap.HeapNode first = heap.getFirst();
@@ -87,13 +87,10 @@ public class DeleteTests {
         return nextMin;
     }
 
-    public static boolean deleteTest(FibonacciHeap heap, FibonacciHeap.HeapNode node) {
+    public static boolean deleteMinTest(FibonacciHeap heap) {
         int expectedSize = heap.size() - 1;
-        FibonacciHeap.HeapNode expectedMin = heap.findMin();
-        if (node == expectedMin) {
-            expectedMin = findNextMin(heap);
-        }
-        heap.delete(node);
+        FibonacciHeap.HeapNode expectedMin = findNextMin(heap);
+        heap.deleteMin();
         if (!checkConsolidationIntegrity(heap)) {
             System.out.println("Bad consolidation integrity!");
             return false;
@@ -118,10 +115,10 @@ public class DeleteTests {
             System.out.println("Heap rule broken!");
             return false;
         }
-//        if (!TestUtils.checkRankRule(heap)) {
-//            System.out.println("Rank rule broken!");
-//            return false;
-//        }
+        if (!TestUtils.checkRankRule(heap)) {
+            System.out.println("Rank rule broken!");
+            return false;
+        }
         if (!TestUtils.checkHeapNodeSingleReference(heap)) {
             System.out.println("Bad nodes referencing!");
             return false;
@@ -143,37 +140,27 @@ public class DeleteTests {
     }
 
     public static void main(String[] args) {
-        System.out.println(Math.log(2));
+        System.out.println(Math.log(0));
+        simpleCase();
         randomHeapsTest();
     }
 
-    public static FibonacciHeap.HeapNode getRandomNode(FibonacciHeap heap) {
-        int maxSteps = 1000;
-        FibonacciHeap.HeapNode curr = heap.getFirst();
-        if (curr == null) {
-            return null;
+    public static boolean simpleCase() {
+        FibonacciHeap heap = new FibonacciHeap();
+        heap.insert(1);
+        heap.insert(2);
+        heap.insert(3);
+        heap.insert(4);
+        heap.insert(5);
+        heap.insert(6);
+        heap.insert(7);
+        heap.insert(8);
+
+        if (!deleteMinTest(heap)) {
+            heap.printHeap();
+            return false;
         }
-        boolean stop = ThreadLocalRandom.current().nextInt(0, 10) < 1;
-        while(!stop) {
-            int numNext = ThreadLocalRandom.current().nextInt(0, maxSteps);
-
-            for (int j = 0; j < numNext; j++) {
-                curr = curr.next;
-            }
-
-            stop = ThreadLocalRandom.current().nextInt(0, 10) < 1;
-
-            if (!stop) {
-                if (curr.child == null) {
-                    return curr;
-                }
-                curr = curr.child;
-            }
-
-            stop = ThreadLocalRandom.current().nextInt(0, 10) < 1;
-        }
-
-        return curr;
+        return true;
     }
 
     public static boolean randomHeapsTest() {
@@ -186,8 +173,7 @@ public class DeleteTests {
             int numDel = ThreadLocalRandom.current().nextInt(0, Math.min(size,maxDeletes)+1);
             heap = TestUtils.getRandomHeap(size);
             for (int j = 0; j < numDel; j++) {
-                FibonacciHeap.HeapNode node = getRandomNode(heap);
-                if (!deleteTest(heap, node)) {
+                if (!deleteMinTest(heap)) {
                     heap.printHeap();
                     return false;
                 }
@@ -197,5 +183,4 @@ public class DeleteTests {
 
         return true;
     }
-
 }
