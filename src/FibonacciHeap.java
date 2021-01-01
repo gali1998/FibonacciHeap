@@ -262,6 +262,9 @@ public class FibonacciHeap {
 	 *
 	 */
 	public void delete(HeapNode x) {
+	    if (x == null) {
+	        return;
+        }
 		int delta = 1 + x.getKey() - this.findMin().getKey(); // we will reduce the key to one less than the minimum
 
 		this.decreaseKey(x, delta);

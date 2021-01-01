@@ -46,6 +46,9 @@ public class DeleteMinTests {
         FibonacciHeap.HeapNode first = heap.getFirst();
         nextMin = findNextMinInList(first, min);
         FibonacciHeap.HeapNode minChild = null;
+        if (heap.size() == 0) {
+            return null;
+        }
         if (min.child != null) {
             minChild = findNextMinInList(min.child, min);
         }
@@ -66,11 +69,7 @@ public class DeleteMinTests {
     public static FibonacciHeap.HeapNode findNextMinInList(FibonacciHeap.HeapNode first, FibonacciHeap.HeapNode min) {
         FibonacciHeap.HeapNode nextMin = null;
         FibonacciHeap.HeapNode curr = first;
-        if (min == null) {
-            System.out.println("AAAAA");
-        }
         if (first == null) {
-
             return null;
         }
         do {
@@ -89,6 +88,9 @@ public class DeleteMinTests {
 
     public static boolean deleteMinTest(FibonacciHeap heap) {
         int expectedSize = heap.size() - 1;
+        if (heap.size() == 0) {
+            expectedSize = 0;
+        }
         FibonacciHeap.HeapNode expectedMin = findNextMin(heap);
         heap.deleteMin();
         if (!checkConsolidationIntegrity(heap)) {
@@ -142,23 +144,22 @@ public class DeleteMinTests {
     public static void main(String[] args) {
         System.out.println(Math.log(0));
         simpleCase();
-        randomHeapsTest();
+//        randomHeapsTest();
     }
 
     public static boolean simpleCase() {
         FibonacciHeap heap = new FibonacciHeap();
         heap.insert(1);
-        heap.insert(2);
-        heap.insert(3);
-        heap.insert(4);
-        heap.insert(5);
-        heap.insert(6);
-        heap.insert(7);
-        heap.insert(8);
 
-        if (!deleteMinTest(heap)) {
-            heap.printHeap();
-            return false;
+        for (int i =0; i< 10; i++) {
+            if (!deleteMinTest(heap)) {
+                heap.printHeap();
+                return false;
+            }
+
+            if (i%2 == 0) {
+                heap.insert(i);
+            }
         }
         return true;
     }
