@@ -138,13 +138,29 @@ public class DeleteMinTests {
             return false;
         }
 
+        if (!TestUtils.checkNumTrees(heap)) {
+            System.out.println("Bad num trees keeping!");
+            return false;
+        }
+        if (!TestUtils.checkRootsNotMarked(heap)) {
+            System.out.println("Has marked roots!");
+            return false;
+        }
+        if (!TestUtils.checkNumMarkedHeap(heap)) {
+            System.out.println("Bad num marked!");
+            return false;
+        }
+
+
         return true;
     }
 
     public static void main(String[] args) {
         System.out.println(Math.log(0));
+        minRankZeroCase();
         simpleCase();
-//        randomHeapsTest();
+        System.out.println("Done with specific cases;");
+        randomHeapsTest();
     }
 
     public static boolean simpleCase() {
@@ -159,6 +175,21 @@ public class DeleteMinTests {
 
             if (i%2 == 0) {
                 heap.insert(i);
+            }
+        }
+        return true;
+    }
+
+    public static boolean minRankZeroCase() {
+        FibonacciHeap heap = new FibonacciHeap();
+        for (int i =10; i>0; i--) {
+            heap.insert(i);
+        }
+
+        for (int i =20; i>0; i--) {
+            if (!deleteMinTest(heap)) {
+                heap.printHeap();
+                return false;
             }
         }
         return true;

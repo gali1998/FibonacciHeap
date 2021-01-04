@@ -45,6 +45,18 @@ public class DecreaseKeyTest {
             System.out.println("Bad rank keeping!");
             return false;
         }
+        if (!TestUtils.checkNumTrees(heap)) {
+            System.out.println("Bad num trees keeping!");
+            return false;
+        }
+        if (!TestUtils.checkRootsNotMarked(heap)) {
+            System.out.println("Has marked roots!");
+            return false;
+        }
+        if (!TestUtils.checkNumMarkedHeap(heap)) {
+            System.out.println("Bad num marked!");
+            return false;
+        }
 
         return true;
     }
@@ -79,6 +91,7 @@ public class DecreaseKeyTest {
     }
 
     public static boolean randomHeapsTest() {
+        int deleteRatio = 10;
         int numIters = 10000;
         int maxDeletes = 1000;
         int maxSize = 1000;
@@ -97,6 +110,9 @@ public class DecreaseKeyTest {
                 if (!decreaseKeyTests(heap, delta, node)) {
                     heap.printHeap();
                     return false;
+                }
+                if (ThreadLocalRandom.current().nextInt(0, deleteRatio) <1) {
+                    heap.deleteMin();
                 }
             }
             System.out.println(i);

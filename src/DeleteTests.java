@@ -138,6 +138,19 @@ public class DeleteTests {
             return false;
         }
 
+        if (!TestUtils.checkNumTrees(heap)) {
+            System.out.println("Bad num trees keeping!");
+            return false;
+        }
+        if (!TestUtils.checkRootsNotMarked(heap)) {
+            System.out.println("Has marked roots!");
+            return false;
+        }
+        if (!TestUtils.checkNumMarkedHeap(heap)) {
+            System.out.println("Bad num marked!");
+            return false;
+        }
+
         return true;
     }
 
@@ -195,8 +208,8 @@ public class DeleteTests {
 
     public static boolean randomHeapsTest() {
         int numIters = 10000;
-        int maxDeletes = 1000;
-        int maxSize = 1000;
+        int maxDeletes = 500;
+        int maxSize = 100;
         FibonacciHeap heap = null;
         for (int i =0; i < numIters; i++) {
             int size = ThreadLocalRandom.current().nextInt(0, maxSize);
@@ -217,8 +230,8 @@ public class DeleteTests {
 
     public static boolean randomOrderHeapsTest() {
         int numIters = 10000;
-        int maxDeletes = 1000;
-        int maxSize = 1000;
+        int maxDeletes = 500;
+        int maxSize = 100;
         FibonacciHeap heap = null;
         for (int i =0; i < numIters; i++) {
             int size = ThreadLocalRandom.current().nextInt(0, maxSize);

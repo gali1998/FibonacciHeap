@@ -254,4 +254,57 @@ public class TestUtils {
         }
         return ((node.rank == numChildren) && (child == null));
     }
+
+    public static boolean checkNumTrees(FibonacciHeap heap) {
+        FibonacciHeap.HeapNode curr = heap.getFirst();
+        int numTrees = 0;
+        if (curr != null) {
+            do {
+                numTrees++;
+                curr = curr.next;
+            } while (curr != heap.getFirst());
+        }
+        return heap.getNumTrees() == numTrees;
+    }
+
+    public static boolean checkRootsNotMarked(FibonacciHeap heap) {
+        FibonacciHeap.HeapNode curr = heap.getFirst();
+        if (curr != null) {
+            do {
+                if (curr.marked) {
+                    return false;
+                }
+                curr = curr.next;
+            } while (curr != heap.getFirst());
+        }
+        return true;
+    }
+
+    public static boolean checkNumMarkedHeap(FibonacciHeap heap) {
+        FibonacciHeap.HeapNode node = heap.getFirst();
+        int numMarked = 0;
+        if (node != null) {
+            do {
+                numMarked += checkNumMarkedTree(node);
+                node = node.next;
+            } while(node != heap.getFirst());
+        }
+        return numMarked == heap.getNumMarked();
+    }
+
+    public static int checkNumMarkedTree(FibonacciHeap.HeapNode node) {
+        FibonacciHeap.HeapNode curr = node.child;
+        int numMarked = 0;
+        if (curr != null) {
+            do {
+                if (curr.marked) {
+                    numMarked++;
+                }
+                numMarked += checkNumMarkedTree(curr);
+                curr = curr.next;
+            } while (curr != node.child);
+        }
+
+        return numMarked;
+    }
 }
