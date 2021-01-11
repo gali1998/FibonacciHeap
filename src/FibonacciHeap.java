@@ -81,10 +81,7 @@ public class FibonacciHeap {
 		}
 
 		HeapNode subtree = this.min.child;
-
 		if (subtree != null) {
-			HeapNode minPrev = this.min.prev;
-			HeapNode minNext = this.min.next;
 			// first we cut out all min subtrees
 			do {
 				subtree.parent = null;
@@ -92,12 +89,17 @@ public class FibonacciHeap {
 				subtree = subtree.next;
 			} while (subtree != this.min.child);
 			this.min.child = null;
+			// we add min's children to left of min
 			this.min.addSibling(subtree);
 		}
 
-		// if the min node is the first, we advance it.
+		// if the min node is first, we update first
 		if (first == min) {
-			first = first.next;
+			if (subtree != null) {
+				first = subtree;
+			} else {
+				first = first.next;
+			}
 		}
 		this.min.removeFromTree();
 		this.min = null;
@@ -120,8 +122,10 @@ public class FibonacciHeap {
 	private void updateMin() {
 		HeapNode curr = this.first;
 		this.min = curr;
+		// iterate over all roots until we've reached the first again
 		do {
 			if (curr.key < this.min.key) {
+				// update the min pointer
 				this.min = curr;
 			}
 			curr = curr.next;
@@ -142,6 +146,7 @@ public class FibonacciHeap {
      * @return the buckets containing trees indexed according to rank
      */
 	private HeapNode[] toBuckets() {
+		// create array with length log_phi(n) + 1 (in case n == 1)
         HeapNode[] rankedTrees = new HeapNode[(int) Math.ceil(Math.log(this.size)/Math.log(1.618)) + 1]; // the max achievable rank is log_phi(n)
         this.first.prev.next = null;
         this.first.prev = null;
@@ -152,10 +157,12 @@ public class FibonacciHeap {
 			x = x.next;
 			y.next = y;
 			y.prev = y;
+			// as long as we can link y:
             while (rankedTrees[y.rank] != null) {
                 y = link(y, rankedTrees[y.rank]);
                 rankedTrees[y.rank - 1] = null;
             }
+            // update the bucket with y's new rank
             rankedTrees[y.rank] = y;
         }
         return rankedTrees;
@@ -169,14 +176,17 @@ public class FibonacciHeap {
         this.first = null;
         this.numTrees = 0;
 
+        // iterate in rank ascending order
         for (HeapNode consolidatedRoot: buckets) {
             if (consolidatedRoot != null) {
                 this.numTrees++;
+				// of this is the first tree, update accordingly
                 if (this.first == null) {
                     this.first = consolidatedRoot;
                     this.first.next = this.first;
                     this.first.prev = this.first;
                 } else {
+                	// add node to list of roots
                     this.first.addSibling(consolidatedRoot);
                 }
             }
@@ -193,9 +203,7 @@ public class FibonacciHeap {
 	 */
 	private static HeapNode link(HeapNode root1, HeapNode root2) {
 		linksCounter++;
-		if (root1.rank != root2.rank) {
-			System.out.print("AAAAAA");
-		}
+		// check for smaller key, add other as the child
 		if (root1.getKey() > root2.getKey()) {
 			root2.addChild(root1);
 			return root2;
@@ -344,11 +352,13 @@ public class FibonacciHeap {
 	 */
 	public void decreaseKey(HeapNode x, int delta) {
 		x.key = x.key - delta;
+		// cut if necessary
 		if (x.parent != null) {
 			if (x.parent.key > x.key) {
 				cascadingCut(x);
 			}
 		}
+		// update min
 		if (x.key < this.min.getKey()) {
 		    this.min = x;
         }
@@ -363,7 +373,7 @@ public class FibonacciHeap {
 	    HeapNode xParent = x.parent;
         this.cut(x);
 		xParent.rank--;
-		if (xParent.parent != null) {
+		if (xParent.parent != null) { // if xParent is not root
 			if (!xParent.marked) {
 				this.mark(xParent);
 			} else {

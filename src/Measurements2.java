@@ -1,12 +1,15 @@
 public class Measurements2 {
     public static void main(String[] args) {
-//        measure(10000);
+        double[] elapsed = new double[3];
         System.out.println("M, Run-Time, totalLinks, totalCuts, Potential");
-        for (int m: new int[] {1, 1, 2 ,3}) {
-            measure((int) (m*Math.pow(10,3)));
+        for (int m: new int[] {1,2,3}) {
+            for (int i = 0; i < 1000; i++) {
+                elapsed[m-1] += measure((int) (m * 1000));
+            }
         }
+        System.out.println(elapsed[0]/100 + ", " + elapsed[1]/100 + ", " + elapsed[2]/100);
     }
-    public static void measure(int m) {
+    public static double measure(int m) {
         FibonacciHeap heap = new FibonacciHeap();
         int initLinks = FibonacciHeap.totalLinks();
         int initCuts = FibonacciHeap.totalCuts();
@@ -27,5 +30,8 @@ public class Measurements2 {
                 (FibonacciHeap.totalLinks() - initLinks) + "," +
                 (FibonacciHeap.totalCuts() - initCuts) + "," +
                 heap.potential());
+
+        return elapsed;
     }
+
 }
