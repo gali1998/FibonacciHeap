@@ -1,13 +1,14 @@
 public class Measurements2 {
     public static void main(String[] args) {
         double[] elapsed = new double[3];
+        int num = 10000;
         System.out.println("M, Run-Time, totalLinks, totalCuts, Potential");
         for (int m: new int[] {1,2,3}) {
-            for (int i = 0; i < 1000; i++) {
+            for (int i = 0; i < num; i++) {
                 elapsed[m-1] += measure((int) (m * 1000));
             }
         }
-        System.out.println(elapsed[0]/1000 + ", " + elapsed[1]/1000 + ", " + elapsed[2]/1000);
+        System.out.println(elapsed[0]/num + ", " + elapsed[1]/num + ", " + elapsed[2]/num);
     }
     public static double measure(int m) {
         FibonacciHeap heap = new FibonacciHeap();
