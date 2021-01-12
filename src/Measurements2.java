@@ -7,7 +7,7 @@ public class Measurements2 {
                 elapsed[m-1] += measure((int) (m * 1000));
             }
         }
-        System.out.println(elapsed[0]/100 + ", " + elapsed[1]/100 + ", " + elapsed[2]/100);
+        System.out.println(elapsed[0]/1000 + ", " + elapsed[1]/1000 + ", " + elapsed[2]/1000);
     }
     public static double measure(int m) {
         FibonacciHeap heap = new FibonacciHeap();

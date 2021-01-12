@@ -2,20 +2,16 @@ public class measurement1 {
 	
 	public static void main(String[] args) {
 
-		int[] numToBig = new int[3];
 		double[] elapsed = new double[3];
+		double c = sequence1(new FibonacciHeap(), 10);
 		System.out.println("M, Run-Time, totalLinks, totalCuts, Potential");
 		for (int k: new int[] {10,11,12}) {
 			for (int i = 0; i < 1000; i++) {
-				double c = sequence1(new FibonacciHeap(), k);
-				if (c > 0.1) {
-					numToBig[k-10]++;
-				}
+				c = sequence1(new FibonacciHeap(), k);
 				elapsed[k-10] += c;
 			}
 		}
 		System.out.println(elapsed[0]/1000 + ", " + elapsed[1]/1000 + ", " + elapsed[2]/1000);
-		System.out.println(numToBig[0] + ", " + numToBig[1] + ", " + numToBig[2]);
 	}
 
 	public static double sequence1(FibonacciHeap heap, int k) {

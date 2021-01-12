@@ -529,24 +529,23 @@ public class FibonacciHeap {
 		}
 
 		public void removeFromTree() {
-			// if this is an only child
-			if (this.next == this) {
-				if (this.parent != null) {
+			// if this is parent's first child:
+			if ((this.parent != null) && (this.parent.child == this)) {
+				// we set parent to point to the next child
+				this.parent.child = this.next;
+				if (this.next == this) {
+					// the next child was this again, we set to null
 					this.parent.child = null;
-					this.parent = null;
 				}
-			} else {
-				if (this.parent != null) {
-					if (this.parent.child == this) {
-						this.parent.child = this.next;
-					}
-					this.parent = null;
-				}
-				this.next.prev = this.prev;
-				this.prev.next = this.next;
-				this.next = this;
-				this.prev = this;
 			}
+			// remove this.parent pointer
+			this.parent = null;
+			// set the node's siblings to point to each other
+			this.next.prev = this.prev;
+			this.prev.next = this.next;
+			// we set the node to point to itself
+			this.next = this;
+			this.prev = this;
 		}
 
 		/**
@@ -560,7 +559,7 @@ public class FibonacciHeap {
 
 			siblingNext.prev = sibling.prev; // this.prev = sibling's last in list
 			sibling.prev.next = siblingNext; // sibling's last in list next = this
-			sibling.prev = siblingPrev; //
+			sibling.prev = siblingPrev; // sibling's prev is this former prev
 			siblingPrev.next = sibling;
 		}
 
