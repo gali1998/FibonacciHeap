@@ -330,7 +330,7 @@ public class FibonacciHeap {
 	 * Deletes the node x from the heap.
 	 *
 	 */
-	public void delete(HeapNode x) { 
+	public void delete(HeapNode x) { // O(n), amort(logn)
 	    if (x == null) {
 	        return;
         }
