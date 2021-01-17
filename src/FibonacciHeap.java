@@ -475,14 +475,6 @@ public class FibonacciHeap {
 		return result;
 	}
 
-	// These are field getters, they're all O(1)
-	public int getNumTrees() {
-		return this.numTrees;
-	}
-	public int getNumOfTrees() {
-		return this.numTrees;
-	}
-
 	public int getNumMarked() { return this.numMarked; }
 
 	public HeapNode getFirst() {
